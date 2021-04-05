@@ -242,6 +242,12 @@ def main():
                 except DuplicateNameException:
                     c = c - 1
                 c = c + 1
+            if "{}".format(arg.getDataType()) == "eOverlayId":
+                try:
+                    arg.setName("eOverlay", SourceType.USER_DEFINED)
+                except DuplicateNameException:
+                    c = c - 1
+                c = c + 1
     print("Renamed {} arguments".format(c))         
 try:
     main()
