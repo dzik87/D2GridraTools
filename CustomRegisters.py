@@ -8,6 +8,7 @@
 import json
 import os
 import platform
+import time
 
 from ghidra.util.exception import CancelledException, InvalidInputException
 from ghidra.program.model.symbol import SourceType
@@ -37,6 +38,7 @@ def stepFindCustomRegisters(s):
         monitor.incrementProgress(1)
         monitor.setShowProgressValue(True)
         
+        # stop on this address - after that we have standard garbage code we dont care about
         if "{}".format(func.getEntryPoint()) == "00681a48":
             break
             
@@ -49,19 +51,20 @@ def stepFindCustomRegisters(s):
             hfdb = HighFunctionDBUtil()
             hfdb.commitParamsToDatabase(high_func, True, SourceType.USER_DEFINED)
             hfdb.commitReturnToDatabase(high_func, SourceType.USER_DEFINED)
+            hfdb.commitLocalNamesToDatabase(high_func, SourceType.USER_DEFINED)
             
             symbols = lsm.getSymbols()
             update = False
             for i, symbol in enumerate(symbols):
-                if (symbol.name.startswith("in_") or symbol.name.startswith("unaff_")) and not symbol.name.startswith("in_register") and not symbol.name.startswith("in_FS") and symbol.parameter == False and not "{}".format(symbol.storage).startswith("unique") and not "{}".format(symbol.storage).startswith("Stack"):
+                if (symbol.name.startswith("in_") or symbol.name.startswith("unaff_")) and not symbol.name.startswith("in_register") and not symbol.name.startswith("in_FS") and symbol.parameter == False and not "{}".format(symbol.storage).startswith("unique") and not "{}".format(symbol.storage).startswith("Stack") and not "{}".format(symbol.storage).startswith("HASH"):
                     func.setCustomVariableStorage(True)
                     p = ParameterImpl(None, symbol.dataType, symbol.storage, currentProgram)
-                    #print("Adding {} as param".format(symbol.storage))
+                    print("Adding {} as param for 0x{}".format(symbol.storage, func.getEntryPoint()))
                     func.addParameter(p, SourceType.USER_DEFINED)
                     update = True
                 else:
                     if symbol.name.startswith("in_stack_000000"):
-                        print("0x{} require stack param {}".format(func.getEntryPoint(), symbol.name))
+                        print("0x{} require stack param {}".format(func.getEntryPoint(), symbol))
             
             if update:
                 #print("Function 0x{} uses custom registers!".format(func.getEntryPoint()))
@@ -71,7 +74,10 @@ def stepFindCustomRegisters(s):
     print("Found {} functions using custom registers!".format(c))
     
 def main():
+    start = time.time()
     stepFindCustomRegisters("Find functions what uses custom registers as arguments and fix them")
+    end = time.time()
+    print(end - start)
         
 try:
     main()

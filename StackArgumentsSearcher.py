@@ -6,6 +6,7 @@
 #@toolbar
 
 import json
+import time
 
 from ghidra.util.exception import CancelledException, InvalidInputException
 from ghidra.program.model.listing import VariableFilter
@@ -45,6 +46,7 @@ def findDataTypeByName(name):
     return dt
     
 def main():
+    start = time.time()
     monitor.initialize(currentProgram.getFunctionManager().getFunctionCount())
     c = 0
     for func in currentProgram.functionManager.getFunctions(1): 
@@ -91,6 +93,8 @@ def main():
                 print("Function 0x{} has defined {}/{} stack arguments".format(func.getEntryPoint(), argcount, retcount))
                 
     print("Found {} functions with wrong stack arguments count".format(c))
+    end = time.time()
+    print(end - start)
 try:
     main()
 except CancelledException:
