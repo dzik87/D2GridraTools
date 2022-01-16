@@ -14,7 +14,20 @@ nick = ghidra.framework.client.ClientUtil.getUserName()
 def main():
     func = currentProgram.functionManager.getFunctionContaining(currentAddress);
     
-    func.setComment("Diablo 2 1.14d reverse team\nhttps://blizzhackers.dev\n\nFunction: {}\nAddress: {}.0x{}\nDate: {}\nLast editor: {}".format(func.getName(), currentProgram.getName().rsplit(".",1)[0], func.getEntryPoint(), today.strftime("%Y.%m.%d"), nick))
+    comment = filter(lambda x: '@description: ' in x, func.getComment().splitlines())
+    if len(comment) > 0:
+        comment = comment[0].split('@description: ')[1]
+    else:
+        comment = ""
+    
+    func.setComment("""Diablo 2 1.14d reverse team
+https://blizzhackers.dev
+        
+@Date: {}
+@Author: {}
+@Function: {}
+@Address: {}.0x{}
+@description: {}""".format(today.strftime("%Y.%m.%d"), nick, func.getName(), currentProgram.getName().rsplit(".",1)[0], func.getEntryPoint(), comment))
         
     if func.hasCustomVariableStorage():
         s = ""
