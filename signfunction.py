@@ -14,8 +14,10 @@ nick = ghidra.framework.client.ClientUtil.getUserName()
 def main():
     func = currentProgram.functionManager.getFunctionContaining(currentAddress);
     
-    comment = filter(lambda x: '@description: ' in x, func.getComment().splitlines())
-    if len(comment) > 0:
+    comment = func.getComment();
+    if comment:
+      comment = filter(lambda x: '@description: ' in x, comment.splitlines())
+    if comment and len(comment) > 0:
         comment = comment[0].split('@description: ')[1]
     else:
         comment = ""
